@@ -1,0 +1,36 @@
+[
+  {
+    "business_unit_id": "hq-001",
+    "store_id": "store-001",
+    "node_id": "node-001",
+    "sku_id": "sku-milk",
+    "available_inventory": 3,
+    "on_order": 2,
+    "reserved_inventory": 1,
+    "backorders": 0,
+    "unit_cost": 4.0,
+    "lead_time_days": 2,
+    "review_period_days": 2,
+    "snapshot_time": "2026-01-02T00:00:00+00:00",
+    "selling_price": 6.0,
+    "regular_price": 6.0,
+    "days_to_expiry": 2
+  },
+  {
+    "business_unit_id": "hq-001",
+    "store_id": "store-001",
+    "node_id": "node-001",
+    "sku_id": "sku-water",
+    "available_inventory": 10,
+    "on_order": 0,
+    "reserved_inventory": 0,
+    "backorders": 0,
+    "unit_cost": 1.5,
+    "lead_time_days": 1,
+    "review_period_days": 2,
+    "snapshot_time": "2026-01-02T00:00:00+00:00",
+    "selling_price": 2.5,
+    "regular_price": 2.5,
+    "days_to_expiry": 30
+  }
+]

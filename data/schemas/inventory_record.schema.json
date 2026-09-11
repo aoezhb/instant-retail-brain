@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InventoryRecord",
+  "type": "object",
+  "required": [
+    "business_unit_id",
+    "store_id",
+    "node_id",
+    "sku_id",
+    "available_inventory",
+    "on_order",
+    "reserved_inventory",
+    "backorders",
+    "unit_cost",
+    "lead_time_days",
+    "review_period_days"
+  ],
+  "properties": {
+    "business_unit_id": { "type": "string", "minLength": 1 },
+    "store_id": { "type": "string", "minLength": 1 },
+    "node_id": { "type": "string", "minLength": 1 },
+    "sku_id": { "type": "string", "minLength": 1 },
+    "available_inventory": { "type": "number", "minimum": 0 },
+    "on_order": { "type": "number", "minimum": 0 },
+    "reserved_inventory": { "type": "number", "minimum": 0 },
+    "backorders": { "type": "number", "minimum": 0 },
+    "unit_cost": { "type": "number", "minimum": 0 },
+    "lead_time_days": { "type": "integer", "minimum": 0 },
+    "review_period_days": { "type": "integer", "minimum": 0 },
+    "snapshot_time": { "type": "string", "format": "date-time" },
+    "selling_price": { "type": "number", "minimum": 0 },
+    "regular_price": { "type": "number", "minimum": 0 },
+    "days_to_expiry": { "type": ["integer", "null"], "minimum": 0 }
+  },
+  "additionalProperties": false
+}

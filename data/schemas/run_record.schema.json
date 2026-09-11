@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RunRecord",
+  "type": "object",
+  "required": [
+    "run_id",
+    "dataset",
+    "decision_state_dataset",
+    "model",
+    "policy",
+    "constraints",
+    "decisions",
+    "approvals",
+    "receipts",
+    "metrics"
+  ],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "dataset": { "$ref": "#/$defs/datasetSnapshot" },
+    "decision_state_dataset": { "$ref": "#/$defs/stateSnapshot" },
+    "model": { "$ref": "#/$defs/componentMetadata" },
+    "policy": { "$ref": "#/$defs/componentMetadata" },
+    "constraints": {
+      "type": "object",
+      "required": [
+        "max_units",
+        "max_spend",
+        "min_order_qty",
+        "service_level",
+        "approval_spend_threshold",
+        "allow_external_write"
+      ],
+      "properties": {
+        "max_units": { "type": "number", "exclusiveMinimum": 0 },
+        "max_spend": { "type": "number", "minimum": 0 },
+        "min_order_qty": { "type": "number", "exclusiveMinimum": 0 },
+        "service_level": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1 },
+        "approval_spend_threshold": { "type": "number", "minimum": 0 },
+        "allow_external_write": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "$ref": "decision.schema.json" }
+    },
+    "approvals": {
+      "type": "array",
+      "items": { "$ref": "approval_record.schema.json" }
+    },
+    "receipts": {
+      "type": "array",
+      "items": { "$ref": "execution_receipt.schema.json" }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "model_output": { "$ref": "model_output.schema.json" }
+  },
+  "$defs": {
+    "componentMetadata": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "stateSnapshot": {
+      "type": "object",
+      "required": ["dataset_id", "version", "snapshot_time"],
+      "properties": {
+        "dataset_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "snapshot_time": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "datasetSnapshot": {
+      "type": "object",
+      "required": ["dataset_id", "version", "snapshot_time", "quality"],
+      "properties": {
+        "dataset_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "snapshot_time": { "type": "string", "format": "date-time" },
+        "quality": {
+          "type": "object",
+          "required": ["total_rows", "valid_rows", "errors"],
+          "properties": {
+            "total_rows": { "type": "integer", "minimum": 0 },
+            "valid_rows": { "type": "integer", "minimum": 0 },
+            "errors": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

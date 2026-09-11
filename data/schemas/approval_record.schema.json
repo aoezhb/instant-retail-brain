@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ApprovalRecord",
+  "type": "object",
+  "required": ["decision_id", "status", "decided_by", "decided_at", "comment"],
+  "properties": {
+    "decision_id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["approved", "rejected"] },
+    "decided_by": { "type": "string", "minLength": 1 },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "comment": { "type": "string" }
+  },
+  "additionalProperties": false
+}

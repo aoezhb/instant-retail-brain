@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StoreNodeBinding",
+  "type": "object",
+  "required": ["business_unit_id", "store_id", "node_id", "role"],
+  "properties": {
+    "business_unit_id": { "type": "string", "minLength": 1 },
+    "store_id": { "type": "string", "minLength": 1 },
+    "node_id": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

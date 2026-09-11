@@ -1,0 +1,47 @@
+name: Component proposal
+description: Suggest a model, policy, metric, scenario, or data-input component
+title: "[Component] "
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: component_type
+    attributes:
+      label: Component type
+      options:
+        - Model
+        - Policy
+        - Metric
+        - Scenario
+        - Data input
+        - Documentation example
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to demonstrate
+      description: Describe the retail or technical question this component would help explore.
+    validations:
+      required: true
+  - type: textarea
+    id: interface
+    attributes:
+      label: Proposed input and output
+      description: Explain how the component fits the existing public formats and interfaces.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Example scope and limitations
+      description: Keep the proposal compact and state where customer-specific work would still be required.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Public information check
+      options:
+        - label: This proposal contains no credentials, personal data, customer exports, or confidential rules.
+          required: true

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Decision",
+  "type": "object",
+  "required": [
+    "decision_id",
+    "decision_type",
+    "business_unit_id",
+    "store_id",
+    "node_id",
+    "fulfillment_node_id",
+    "sku_id",
+    "recommended_action",
+    "quantity",
+    "estimated_spend",
+    "reason_codes",
+    "expected_effect",
+    "risk_summary",
+    "constraints_applied",
+    "approval_required",
+    "expires_at",
+    "action_context"
+  ],
+  "properties": {
+    "decision_id": { "type": "string", "minLength": 1 },
+    "decision_type": { "enum": ["replenishment", "assortment", "pricing", "store_risk"] },
+    "business_unit_id": { "type": "string", "minLength": 1 },
+    "store_id": { "type": "string", "minLength": 1 },
+    "node_id": { "type": "string", "minLength": 1 },
+    "fulfillment_node_id": { "type": ["string", "null"] },
+    "sku_id": { "type": "string", "minLength": 1 },
+    "recommended_action": {
+      "enum": ["order", "retain", "review_delist", "markdown", "restore_price", "monitor", "review_store_risk"]
+    },
+    "quantity": { "type": "number", "minimum": 0 },
+    "estimated_spend": { "type": "number", "minimum": 0 },
+    "reason_codes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "expected_effect": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "risk_summary": { "type": "string" },
+    "constraints_applied": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "approval_required": { "type": "boolean" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "action_context": { "type": "object" }
+  },
+  "additionalProperties": false
+}

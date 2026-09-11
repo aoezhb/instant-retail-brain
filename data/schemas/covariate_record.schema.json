@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CovariateRecord",
+  "type": "object",
+  "required": [
+    "business_unit_id",
+    "store_id",
+    "node_id",
+    "sku_id",
+    "day",
+    "values",
+    "event_time",
+    "available_time"
+  ],
+  "properties": {
+    "business_unit_id": { "type": "string", "minLength": 1 },
+    "store_id": { "type": "string", "minLength": 1 },
+    "node_id": { "type": "string", "minLength": 1 },
+    "sku_id": { "type": "string", "minLength": 1 },
+    "day": { "type": "string", "format": "date" },
+    "values": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "number" }
+    },
+    "event_time": { "type": "string", "format": "date-time" },
+    "available_time": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

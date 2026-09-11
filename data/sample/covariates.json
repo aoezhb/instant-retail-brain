@@ -1,0 +1,32 @@
+[
+  {
+    "business_unit_id": "hq-001",
+    "store_id": "store-001",
+    "node_id": "node-001",
+    "sku_id": "sku-milk",
+    "day": "2026-01-02",
+    "values": {
+      "weekend": 0,
+      "promotion": 1,
+      "holiday": 0,
+      "temperature": 9
+    },
+    "event_time": "2026-01-02T00:00:00+00:00",
+    "available_time": "2026-01-01T12:00:00+00:00"
+  },
+  {
+    "business_unit_id": "hq-001",
+    "store_id": "store-001",
+    "node_id": "node-001",
+    "sku_id": "sku-water",
+    "day": "2026-01-02",
+    "values": {
+      "weekend": 0,
+      "promotion": 0,
+      "holiday": 0,
+      "temperature": 9
+    },
+    "event_time": "2026-01-02T00:00:00+00:00",
+    "available_time": "2026-01-01T12:00:00+00:00"
+  }
+]

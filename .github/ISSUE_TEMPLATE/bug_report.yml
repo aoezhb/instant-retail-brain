@@ -1,0 +1,48 @@
+name: Bug report
+description: Report a reproducible problem in the example flow
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting a problem. English and Chinese reports are both welcome.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Problem summary
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the command, input type, selected model and selected policy.
+      placeholder: |
+        1. Install with ...
+        2. Run ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system and Python version.
+      placeholder: Windows 11, Python 3.12
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Relevant output
+      description: Remove credentials, customer data, and confidential operating rules.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Public information check
+      options:
+        - label: I removed credentials, personal data, customer exports, and confidential information.
+          required: true

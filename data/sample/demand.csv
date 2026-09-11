@@ -1,0 +1,3 @@
+business_unit_id,store_id,node_id,sku_id,day,demand,available,event_time,available_time
+hq-001,store-001,node-001,sku-milk,2026-01-01,5,true,2026-01-01T00:00:00+00:00,2026-01-01T00:00:00+00:00
+hq-001,store-001,node-001,sku-water,2026-01-01,3,true,2026-01-01T00:00:00+00:00,2026-01-01T00:00:00+00:00

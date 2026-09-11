@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExecutionReceipt",
+  "type": "object",
+  "required": ["decision_id", "status", "reason", "executed_at"],
+  "properties": {
+    "decision_id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["accepted", "rejected"] },
+    "reason": { "type": "string", "minLength": 1 },
+    "executed_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

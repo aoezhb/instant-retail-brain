@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ModelOutput",
+  "type": "object",
+  "required": [
+    "model_name",
+    "model_version",
+    "input_snapshot_version",
+    "generated_at",
+    "forecast_scope",
+    "horizon_days",
+    "forecast_semantics",
+    "items"
+  ],
+  "properties": {
+    "model_name": { "type": "string", "minLength": 1 },
+    "model_version": { "type": "string", "minLength": 1 },
+    "input_snapshot_version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "forecast_scope": { "type": "string", "minLength": 1 },
+    "horizon_days": { "type": "integer", "minimum": 1 },
+    "forecast_semantics": { "const": "daily_rate" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["business_unit_id", "store_id", "node_id", "sku_id", "point_forecast", "quantiles"],
+        "properties": {
+          "business_unit_id": { "type": "string", "minLength": 1 },
+          "store_id": { "type": "string", "minLength": 1 },
+          "node_id": { "type": "string", "minLength": 1 },
+          "sku_id": { "type": "string", "minLength": 1 },
+          "point_forecast": { "type": "number", "minimum": 0 },
+          "quantiles": {
+            "type": "object",
+            "patternProperties": {
+              "^0?\\.(?:\\d*[1-9]\\d*)$": { "type": "number", "minimum": 0 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
