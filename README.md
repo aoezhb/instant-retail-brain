@@ -6,9 +6,11 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-2E8B57)
 ![Status: Reference implementation](https://img.shields.io/badge/Status-Reference%20implementation-E76F51)
 
-A runnable, platform-neutral reference framework for instant-retail forecasting and operating decisions.
+A systematic, extensible decision pipeline for intelligent replenishment in instant-retail systems.
 
-It shows how retail data, demand models, replenishment and advisory policies, approval checks, historical replay, and result recording can work together without depending on a specific retail platform. It is intended for technical evaluation, algorithm experiments, solution discussions, and customer-specific implementation work. It is not a production-ready retail system.
+`instant-retail-brain` shows how a retail system can move from data input to an auditable replenishment decision without depending on a specific platform. Users can inject business data through data adapters, replace forecasting models and operating policies through a pluggable registration mechanism, and reuse data-quality checks, constraint validation, historical replay, result recording, and evaluation components as they build a system for their own operations.
+
+The project is a runnable reference implementation for technical evaluation, algorithm experiments, solution discussions, and customer-specific implementation work. It uses synthetic data and does not include customer connectors, credentials, confidential rules, or automatic production writes.
 
 ![instant-retail-brain project flow](docs/assets/github-social-preview.png)
 
