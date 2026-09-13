@@ -56,6 +56,46 @@
       "type": "object",
       "additionalProperties": { "type": "number" }
     },
+    "result_summary": {
+      "type": "object",
+      "required": ["aggregate", "items"],
+      "properties": {
+        "aggregate": {
+          "type": "object",
+          "required": ["forecast_p50", "forecast_p90", "recommended_order_qty", "expected_cost", "stockout_risk", "approval_required", "constraint_status"],
+          "properties": {
+            "forecast_p50": { "type": "number", "minimum": 0 },
+            "forecast_p90": { "type": "number", "minimum": 0 },
+            "recommended_order_qty": { "type": "number", "minimum": 0 },
+            "expected_cost": { "type": "number", "minimum": 0 },
+            "stockout_risk": { "type": "number", "minimum": 0, "maximum": 1 },
+            "approval_required": { "type": "boolean" },
+            "constraint_status": { "enum": ["passed", "partial", "rejected"] }
+          },
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["business_unit_id", "store_id", "node_id", "sku_id", "forecast_p50", "forecast_p90", "recommended_order_qty", "expected_cost", "decision_id"],
+            "properties": {
+              "business_unit_id": { "type": "string" },
+              "store_id": { "type": "string" },
+              "node_id": { "type": "string" },
+              "sku_id": { "type": "string" },
+              "forecast_p50": { "type": "number", "minimum": 0 },
+              "forecast_p90": { "type": "number", "minimum": 0 },
+              "recommended_order_qty": { "type": "number", "minimum": 0 },
+              "expected_cost": { "type": "number", "minimum": 0 },
+              "decision_id": { "type": ["string", "null"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "model_output": { "$ref": "model_output.schema.json" }
   },
   "$defs": {

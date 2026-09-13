@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "instant-retail-brain"
 version = "0.1.0"
-description = "A small, platform-neutral toolkit for instant-retail forecasting and decisions."
+description = "An auditable replenishment decision pipeline for instant-retail and front-warehouse operations."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -15,6 +15,8 @@ dependencies = []
 [project.optional-dependencies]
 lightgbm = ["lightgbm[scikit-learn]>=4.0,<5"]
 test = ["jsonschema>=4.22,<5"]
+demo = ["streamlit>=1.36,<2"]
+research-llm = ["openai>=1.40,<2"]
 
 [project.scripts]
 ird = "ird.cli:main"

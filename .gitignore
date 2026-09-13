@@ -10,3 +10,4 @@ reports/
 .coverage
 .idea/
 .vscode/
+.streamlit/

@@ -15,6 +15,7 @@ class ItemReplayResult:
     ordered_units: float
     served_units: float
     demanded_units: float
+    average_inventory: float
 
 
 @dataclass(frozen=True)
@@ -40,6 +41,10 @@ class ReplayResult:
     @property
     def ending_inventory(self) -> float:
         return round(sum(item.ending_inventory for item in self.items), 2)
+
+    @property
+    def average_inventory(self) -> float:
+        return round(sum(item.average_inventory for item in self.items), 2)
 
 
 def replay_inventory(
@@ -71,6 +76,8 @@ def replay_inventory(
         served = 0.0
         demanded = 0.0
         stockout_events = 0
+        inventory_total = 0.0
+        inventory_days = 0
         records = dataset.demand_for(item)
         records = tuple(record for record in records if record.day >= start_day)
         for record in records:
@@ -78,12 +85,15 @@ def replay_inventory(
             served_today = min(inventory, record.demand) if record.available else 0.0
             served += served_today
             inventory -= served_today
+            inventory_total += inventory
+            inventory_days += 1
             if served_today < record.demand:
                 stockout_events += 1
         item_results.append(
             ItemReplayResult(
                 item, stockout_events, round(inventory, 2), round(ordered, 2),
                 round(served, 2), round(demanded, 2),
+                round(inventory_total / inventory_days, 2) if inventory_days else round(inventory, 2),
             )
         )
     return ReplayResult(tuple(item_results))

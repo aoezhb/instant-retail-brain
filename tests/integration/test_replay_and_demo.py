@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import unittest
 from dataclasses import replace
-from datetime import datetime, timezone
+from datetime import datetime, time, timezone
 from pathlib import Path
 
 from examples import custom_policy  # noqa: F401 - registers example policy
-from ird.cli import run_demo
+from ird.cli import _split_dataset_for_demo, run_demo
 from ird.data import make_business_states, make_synthetic_dataset
 from ird.evaluation import evaluate_replay
 from ird.execution import BacktestExecutor, validate_decisions
@@ -174,6 +174,57 @@ class ReplayAndDemoTests(unittest.TestCase):
         self.assertGreaterEqual(metrics["fill_rate"], 0)
         self.assertLessEqual(metrics["fill_rate"], 1)
 
+    def test_demo_result_summary_is_schema_ready(self) -> None:
+        payload = run_demo()
+        summary = payload["result_summary"]
+        self.assertEqual(set(summary), {"aggregate", "items"})
+        self.assertIn("forecast_p50", summary["aggregate"])
+        self.assertTrue(summary["items"])
+
+    def test_uploaded_demo_uses_non_overlapping_time_windows(self) -> None:
+        dataset = make_synthetic_dataset(days=10)
+        historical_snapshot = datetime.combine(
+            dataset.demand_records[14].day, time.min, tzinfo=timezone.utc
+        )
+        dataset = replace(
+            dataset,
+            inventory_records=tuple(
+                replace(record, snapshot_time=historical_snapshot)
+                for record in dataset.inventory_records
+            ),
+        )
+        training, evaluation = _split_dataset_for_demo(dataset)
+        self.assertLess(
+            max(record.day for record in training.demand_records),
+            min(record.day for record in evaluation.demand_records),
+        )
+        self.assertNotEqual(training.version, evaluation.version)
+        self.assertEqual(training.version, f"{dataset.version}-train")
+        self.assertEqual(evaluation.version, f"{dataset.version}-eval")
+        self.assertTrue(
+            all(
+                record.snapshot_time <= training.snapshot_time
+                for record in training.inventory_records
+            )
+        )
+
+    def test_uploaded_demo_rejects_future_inventory_snapshot(self) -> None:
+        dataset = make_synthetic_dataset(days=10)
+        with self.assertRaisesRegex(ValueError, "historical inventory snapshot"):
+            _split_dataset_for_demo(dataset)
+
+    def test_uploaded_demo_requires_more_than_one_day(self) -> None:
+        dataset = make_synthetic_dataset(days=7)
+        one_day = replace(
+            dataset,
+            demand_records=tuple(
+                record for record in dataset.demand_records
+                if record.day == dataset.demand_records[0].day
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "at least two demand days"):
+            _split_dataset_for_demo(one_day)
+
     def test_demo_runs_full_chain(self) -> None:
         payload = run_demo()
         training = make_synthetic_dataset(
@@ -182,6 +233,8 @@ class ReplayAndDemoTests(unittest.TestCase):
         )
         evaluation = make_synthetic_dataset(days=21)
         self.assertEqual(payload["run_id"], "demo-run")
+        self.assertEqual(payload["model"]["name"], "covariate_quantile")
+        self.assertEqual(payload["policy"]["name"], "quantile_replenishment")
         self.assertEqual(payload["model"]["input_snapshot_version"], training.version)
         self.assertEqual(payload["dataset"]["version"], evaluation.version)
         self.assertEqual(payload["decision_state_dataset"]["version"], training.version)

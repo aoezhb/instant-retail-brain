@@ -54,7 +54,7 @@ flowchart TB
 
 The model produces forecasts only. The policy combines forecasts, inventory state, and limits to produce a `Decision`. The executor checks action types, expiry, `ApprovalRecord` entries, external-write settings, and cumulative batch quantity and spend.
 
-## Business Unit, Store, and Node
+## Business Unit, Demand Storefront, and Front-Warehouse Node
 
 ```mermaid
 erDiagram
@@ -69,9 +69,9 @@ erDiagram
     SKU ||--o{ INVENTORY_RECORD : stocked_as
 ```
 
-`business_unit_id`, `store_id`, and `node_id` remain distinct even when the demo uses one store and one fulfillment node. Every runtime item key includes all three identities plus `sku_id`, preventing equal local IDs from different business units from colliding. The Handler exposes explicit `StoreNodeBinding` records.
+`business_unit_id`, `store_id`, and `node_id` remain distinct. In a typical front-warehouse operation, `store_id` identifies the online storefront, sales channel, or other demand source, while `node_id` identifies the front warehouse that holds inventory and fulfills orders. Every runtime item key includes all three identities plus `sku_id`, and the Handler exposes explicit `StoreNodeBinding` records.
 
-To keep the example small, the dataset stores demand and inventory on an attributed store-node service lane. A production network with shared node inventory, split fulfillment, or dynamic sourcing must replace this lane-level attribution with its actual allocation and network-state logic.
+To keep the example small, the dataset stores demand and inventory on an attributed storefront-to-front-warehouse service lane. A production network with one warehouse serving multiple storefronts, shared inventory, multiple fulfillment nodes, split fulfillment, or dynamic sourcing must replace this lane-level attribution with its actual allocation and network-state logic.
 
 ## Time Handling and Historical Replay
 

@@ -65,7 +65,7 @@ class DomainAndDataTests(unittest.TestCase):
         dataset = RetailDataHandler().build_dataset(
             demand_rows,
             inventory_rows,
-            datetime(2026, 1, 2, tzinfo=timezone.utc),
+            datetime(2026, 1, 5, tzinfo=timezone.utc),
             covariate_rows,
         )
         self.assertEqual(len(dataset.covariate_records), 2)

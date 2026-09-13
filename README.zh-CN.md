@@ -6,11 +6,15 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-2E8B57)
 ![项目状态：参考实现](https://img.shields.io/badge/%E9%A1%B9%E7%9B%AE%E7%8A%B6%E6%80%81-%E5%8F%82%E8%80%83%E5%AE%9E%E7%8E%B0-E76F51)
 
-一个面向即时零售系统智能补货的、系统化且可扩展的决策流水线。
+面向即时零售与前置仓业务的可扩展、可验证、可审计智能补货决策流水线框架。
 
-`instant-retail-brain` 展示了零售系统如何在不依赖特定平台的前提下，从数据输入走到可审计的补货决策。用户可以通过数据适配器注入真实业务数据，通过可插拔的模型与策略注册机制替换需求预测模型和经营策略，并复用数据质量检查、约束校验、历史回放、结果记录和效果评估能力，逐步搭建适用于自身业务的智能补货系统。
+需求预测、分位数预测、安全库存和库存优化等算法，基本都能找到开源实现。但智能补货一般做不好的原因，并不是缺少某个算法，而是缺少贯穿数据口径、模型选择、库存状态、经营约束、审批执行和效果评估的系统性流程。
 
-本项目是可运行的参考实现，适合技术验证、算法实验、方案交流和客户项目起步。项目使用合成数据，不包含客户连接器、凭证、保密规则或生产环境自动写入能力。
+`instant-retail-brain` 是对这一问题的工程化探索。它不试图发明万能算法，而是把可替换的算法组件组织成一条可验证、可拒绝、可回放、可审计的决策流水线。
+
+> 战争太重要了，不能交给将军们。
+
+如果你深以为然，或者对数据定义、业务边界和实现方式有不同看法，欢迎通过邮件 [aoezhb@gmail.com](mailto:aoezhb@gmail.com) 交流和指正。
 
 ![instant-retail-brain 项目流程](docs/assets/github-social-preview.png)
 
@@ -19,28 +23,89 @@
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
-python -m pip install -e ".[test]"
+python -m pip install -e .
 python -m ird demo
 ```
 
-命令使用固定的合成数据，并输出完整的 JSON 运行记录。下面是对主要结果的精简展示：
+命令使用固定合成数据，输出包含数据版本、模型、策略、约束、审批、执行回执和评估指标的 JSON 运行记录。
 
 ```json
 {
-  "model": "moving_average",
-  "policy": "safety_stock",
-  "accepted_decisions": 2,
-  "metrics": {
-    "ordered_units": 27.38,
-    "fill_rate": 0.641,
-    "committed_spend": 101.24
-  }
+  "aggregate": {
+    "forecast_p50": 8.48,
+    "forecast_p90": 8.88,
+    "recommended_order_qty": 17.96,
+    "expected_cost": 71.84,
+    "stockout_risk": 0.5086,
+    "approval_required": false,
+    "constraint_status": "passed"
+  },
+  "items": [{
+    "sku_id": "sku-milk",
+    "forecast_p50": 5.36,
+    "forecast_p90": 5.63,
+    "recommended_order_qty": 17.96,
+    "expected_cost": 71.84,
+    "decision_id": "ed62f9be-fcf4-5142-8b5a-7459bf8e96ac"
+  }, {
+    "sku_id": "sku-water",
+    "forecast_p50": 3.12,
+    "forecast_p90": 3.25,
+    "recommended_order_qty": 0.0,
+    "expected_cost": 0.0,
+    "decision_id": null
+  }]
 }
 ```
 
-## 整体流程
+以上结果来自合成数据和简化回放，仅用于展示数据结构与运行链路，不代表真实业务效果或已经完成概率校准。
 
-项目提供一个精简且可直接运行的示例流程：
+## 为什么不能只做预测
+
+预测结果不能回答一笔订单是否买得起、能否执行、是否需要审批。可用的补货系统还必须结合库存位置、提前期、服务目标、预算、最小订货量、审批规则和证据链。
+
+| 层次 | 职责 |
+|---|---|
+| Data Provider / Handler | 注入并校验需求、库存和协变量数据 |
+| Model | 估计未来需求和不确定性 |
+| Policy | 将预测和库存状态转换为建议动作 |
+| Executor | 使用确定性约束接受或拒绝动作 |
+| Replay / Evaluation | 在历史数据上评估决策结果 |
+| Recorder | 保存版本、参数、决策、审批和回执 |
+
+核心补货流程不依赖 LLM。P50/P90、订货量、预算约束、审批判断和执行检查均由确定性模型与规则引擎完成。
+
+## 前置仓应用
+
+前置仓是即时零售常见的履约形态，也是本项目重点适配的场景：
+
+- `business_unit_id`：经营主体；
+- `store_id`：线上门店、销售渠道或需求归属；
+- `node_id`：实际持有库存并完成履约的前置仓节点；
+- `StoreNodeBinding`：需求来源与前置仓之间的服务关系。
+
+流水线可以汇总门店或渠道需求，结合前置仓现货、在途、预留、欠货、提前期和复核周期，输出 SKU 补货数量、预计金额、回放缺货结果和审批要求。
+
+当前示例使用一店一仓关系。一仓多店、多仓服务同一渠道、共享库存、拆单履约和动态寻源，需要在客户项目中补充网络分配与库存归属规则。
+
+## 最小 Web Demo
+
+```bash
+python -m pip install -e ".[demo,test]"
+streamlit run examples/web_demo.py
+```
+
+Demo 支持：
+
+- 使用内置合成数据；
+- 上传需求 CSV 与库存 JSON；
+- 选择预测模型和补货策略；
+- 查看汇总结果、SKU 明细、指标和约束状态；
+- 下载完整 JSON 决策记录。
+
+上传数据需要至少两个需求日期，系统按时间切分训练窗口和未来评估窗口。库存 JSON 必须是训练截止日当日或更早的历史快照；如果用当前库存回测更早的需求，会产生未来信息泄漏。CSV 与库存 JSON 必须使用一致的经营主体、门店、仓点和 SKU 标识。完整要求见[数据契约](data/README.zh-CN.md)。
+
+## 系统链路
 
 ```mermaid
 flowchart LR
@@ -52,103 +117,23 @@ flowchart LR
     F --> G[DecisionPolicy]
     D --> G
     G --> H[Decision]
-    H --> I[Executor 二次校验]
-    I --> J[HistoricalReplay]
+    H --> I[Executor 校验]
+    I --> J[Historical Replay]
     J --> K[Recorder 与 Evaluation]
 ```
 
-`business_unit_id`、`store_id`、`node_id` 分别表示总店/经营主体、门店和履约仓点。即使示例中门店与仓点是一对一，也不会混用其身份与库存职责。
-
-## 当前包含的内容
-
-| 内容 | 当前仓库 | 客户项目 |
+| 能力 | 当前仓库 | 客户项目仍需补充 |
 |---|---|---|
-| 数据输入 | 合成数据和文件输入 | 对接经过授权的 ERP、WMS、OMS、POS 和财务数据 |
-| 主体关系 | 分开表示经营主体、门店和履约仓点 | 按客户组织与履约网络调整 |
-| 需求预测 | 移动平均、Holt、协变量分位数、可选 LightGBM | 使用客户数据重新训练、验证和监控 |
-| 经营决策 | 补货、选品、临期定价和门店风险示例 | 调整经营规则、权限和财务口径 |
-| 决策检查 | 数量、金额、重复决策和审批信息检查 | 增加客户自己的经营和财务检查 |
-| 效果评估 | 库存历史回放、指标和运行记录 | 增加情景仿真、影子运行、灰度和在线监控 |
-| 组件扩展 | 使用 Python 注册模型和策略 | 按需增加连接器、模型、策略、场景和指标 |
-
-## 项目缘起
-
-本项目起源于一次客户咨询，以及围绕即时零售决策问题开展的初步研究。在梳理需求预测、库存决策、经营建议和执行流程的过程中，我们将其中具有共性的思路整理成一套便于扩展的框架，使数据格式、预测模型、决策策略、历史回放和审批记录可以分别修改。本仓库只保留可复用的代码结构和合成示例，不包含客户数据、保密规则或面向特定客户的实现。
-
-## 项目思路
-
-当前仓库只实现一个精简的示例流程。面向客户的实际项目需要结合系统、数据口径、经营流程和风险控制进行修改，主要思路如下：
-
-- 建立平台中立的统一零售数据层，承接经过授权的订单、商品、库存、采购、履约、结算和财务数据。
-- 将数据处理、模型、经营策略、约束检查、人工审批、外部执行和效果评估分别实现。
-- 同时容纳配置驱动的标准工作流与代码驱动的组件扩展。
-- 按风险高低依次开展历史回放、情景仿真、影子运行、人工审批、门店灰度和受控在线执行。
-- 完整记录数据版本、质量状态、模型参数、策略约束、人工决定、执行回执和经营结果。
-- 通过统一的输入输出格式扩展数据连接器、模型、经营策略、仿真场景和评估指标。
-- 以数据质量、贡献毛利、库存资金和现金流要求约束所有自动化决策。
-- 保证模型建议可解释、经营动作可拒绝、运行策略可审计且可回退。
-
-以上内容并未全部在本示例中实现。当前仓库包含文件与合成数据输入、通过代码替换 Model 和 Policy、本地回放、审批信息检查和运行记录。完整零售数据连接器、配置文件驱动的流程、Scenario 与指标加载、贡献毛利与现金流限制、影子运行、灰度发布、在线执行和回退方案，应在具体客户项目中补充。
-
-## 尝试更多配置
-
-```bash
-python -m ird demo --model covariate_quantile --policy quantile_replenishment
-python -m pip install -e ".[lightgbm,test]"
-python -m ird demo --model lightgbm --policy quantile_replenishment
-python examples/advisory_demo.py
-python examples/custom_policy.py
-python -m unittest discover -s tests -t . -v
-```
-
-演示使用确定性合成数据，并输出包含决策状态快照、评估数据快照、模型输出、策略决策、执行回执和指标的 JSON 运行记录。
-
-## 实例说明
-
-### 基础补货
-
-```bash
-python -m ird demo
-```
-
-该命令运行移动平均模型和安全库存策略。JSON 中的 `decision_state_dataset` 是生成决策时使用的数据快照，`dataset` 是后续回放使用的评估数据；每条 `receipt` 会说明执行器接受或拒绝决策的原因。
-
-### 概率补货
-
-```bash
-python -m ird demo --model covariate_quantile --policy quantile_replenishment
-```
-
-该命令通过 Registry 替换模型和策略，不需要修改现有回放代码。`model_output.items[].quantiles` 包含 P10、P50、P90，策略会选择与服务水平对应的分位数，并在 `action_context` 中记录累计需求近似。
-
-### 选品与临期建议
-
-```bash
-python examples/advisory_demo.py
-```
-
-该示例输出选品、定价和门店风险决策。它们共享公共 `Decision` Schema，但只作为建议，不进入补货回放。
+| 数据输入 | 合成数据、CSV 和 JSON | ERP、WMS、OMS、POS 和财务连接器 |
+| 需求预测 | 移动平均、Holt、协变量分位数、可选 LightGBM | 真实数据训练、校准、漂移监控 |
+| 补货策略 | 安全库存与分位数补货 | 包装规格、订货日历、供应商和资金规则 |
+| 约束检查 | 数量、金额、重复、审批和外部写入检查 | 客户权限、财务和操作约束 |
+| 评估记录 | 时间留出、库存回放、指标和运行记录 | 滚动回测、影子运行、灰度、监控和回退 |
+| 扩展方式 | Python 模型与策略注册 | 数据连接器、场景和配置化流程 |
 
 ## 替换模型或策略
 
-通过统一接口，可以保留现有的数据处理、回放、检查和记录代码，只替换本次实验所需的模型或策略。
-
-```mermaid
-flowchart LR
-    A[RetailDataset] --> B{已注册模型}
-    B --> C[内置模型]
-    B --> D[自定义模型]
-    C --> E[ModelOutput]
-    D --> E
-    E --> F{已注册策略}
-    F --> G[内置策略]
-    F --> H[自定义策略]
-    G --> I[Decision]
-    H --> I
-    I --> J[检查与历史回放]
-```
-
-一个策略需要实现 `decide`、`explain` 和 `describe`，然后登记它的输入、输出、参数和使用限制：
+模型实现 `fit`、`predict` 和 `describe`；策略实现 `decide`、`explain` 和 `describe`，然后登记组件元数据。
 
 ```python
 from ird.registry import ComponentAsset, register_policy
@@ -168,34 +153,54 @@ register_policy(
 )
 ```
 
-模型采用相同方式，实现 `fit`、`predict`、`describe` 并调用 `register_model`。完整写法可参考[自定义策略示例](examples/custom_policy.py)和公共[组件接口](src/ird/interfaces.py)。
+完整示例见 [custom_policy.py](examples/custom_policy.py) 和 [公共组件接口](src/ird/interfaces.py)。
+
+## 内置组件
+
+模型：
+
+- `moving_average`：透明的移动平均基线；
+- `holt_trend`：表达局部水平与趋势；
+- `covariate_quantile`：输出 P10/P50/P90 的协变量岭回归；
+- `lightgbm`：可选的全局点预测与分位数模型。
+
+策略：
+
+- `safety_stock`：点预测安全库存补货；
+- `quantile_replenishment`：按服务水平选择分位数；
+- `risk_adjusted_assortment`：建议型 SKU 保留评分；
+- `expiry_markdown`：临期折扣与价格恢复建议；
+- `store_risk`：门店和仓点风险汇总。
 
 ```bash
+python -m ird demo --model moving_average --policy safety_stock
+python -m pip install -e ".[lightgbm,test]"
+python -m ird demo --model lightgbm --policy quantile_replenishment
+python examples/advisory_demo.py
 python examples/custom_policy.py
 ```
 
-该示例会输出注册后的策略信息，包括参数和已注明的使用限制。
+## 项目边界
 
-## Framework Zoo（组件资产库）
+本仓库是参考实现，不是可直接部署到客户业务的生产系统。项目不包含真实客户数据、平台凭证、生产连接器、多租户、在线自动下单、完整权限系统、影子运行、灰度发布或回退控制。
 
-内置模型：
+评估指标来自合成数据和简化回放。真实使用前必须重新定义数据口径、时间窗口、缺货与不可售处理、库存计价、财务约束、审批流程和风险规则。
 
-- `moving_average`：透明的移动平均基线。
-- `holt_trend`：表达局部水平与趋势的双指数平滑。
-- `covariate_quantile`：使用时间可用协变量的岭回归，输出 P10/P50/P90。
-- `lightgbm`：可选的全局梯度提升模型，使用日历、协变量、滞后和滚动特征，输出点预测与分位数。
+LLM 不是当前主线能力。研究模块只考虑非结构化供应商信息、自然语言查询、异常工单归纳和跨系统信息收集，不参与预测、补货计算、约束、审批或外部写入。
 
-内置策略：
+## 延伸阅读
 
-- `safety_stock`：点预测安全库存补货。
-- `quantile_replenishment`：按服务水平选择分位数的补货策略。
-- `risk_adjusted_assortment`：建议型 SKU 保留评分。
-- `expiry_markdown`：受成本价和正常价约束的临期折扣与价格恢复建议。
-- `store_risk`：聚合缺货、临期和毛利压力的门店/仓点评分。
-
-`daily_rate` 表示日均需求。岭回归与 LightGBM 示例只支持单日预测；Holt 多日预测返回预测期内的平均日需求。分位数补货以每日需求相互独立作为累计不确定性的简化假设。需要审批的决策只有在传入包含审批人和审批时间的审批记录后才会被执行器接受。
-
-基准 CLI 只接受补货类策略。选品和定价策略虽然使用相同的 `Decision` Schema，但在真实使用前需要各自的回放方式与客户审批规则。
+- [架构说明](docs/architecture.zh-CN.md)
+- [评估指标口径](docs/evaluation_metrics.zh-CN.md)
+- [需求协变量与概率预测](docs/demand_covariates_and_probabilistic_forecasting.zh-CN.md)
+- [模型与算法选型指南](docs/models/model_and_algorithm_selection_guide.zh-CN.md)
+- [门店与仓点为什么必须分开](docs/articles/why-stores-and-fulfillment-nodes-must-be-separated.zh-CN.md)
+- [概率预测如何驱动补货](docs/articles/probabilistic-forecasting-for-replenishment.zh-CN.md)
+- [如何把需求模型替换为 LightGBM](docs/articles/replacing-the-demand-model-with-lightgbm.zh-CN.md)
+- [LLM 的定位](docs/llm-positioning.zh-CN.md)
+- [参与贡献](CONTRIBUTING.zh-CN.md)
+- [安全说明](SECURITY.zh-CN.md)
+- [免责声明](DISCLAIMER.zh-CN.md)
 
 ## 文件结构
 
@@ -203,31 +208,11 @@ python examples/custom_policy.py
 instant-retail-brain/
 ├── src/ird/                 # Python 包
 ├── data/                    # 交换 Schema 与安全样例
-├── examples/                # 可运行示例
-├── docs/                    # 架构与技术指南
-└── tests/                   # 聚焦的单元、集成和 Schema 测试
+├── examples/                # CLI 扩展与 Web Demo
+├── docs/                    # 架构、指标和技术文章
+└── tests/                   # 单元、集成、扩展和 Schema 测试
 ```
-
-## 适用范围
-
-本仓库用于展示各模块如何配合、算法组件如何替换，不是可直接部署到客户业务的生产系统。真实使用前必须按客户的组织关系、门店/仓点网络、数据质量、财务口径、权限、需求弹性和风险规则进行裁剪。
-
-项目不包含真实平台写接口、完整 ERP/WMS/OMS/POS、多租户、实时流平台、自动调价或自动关店。
-
-将本项目用于真实业务前，请阅读完整的[免责声明](DISCLAIMER.zh-CN.md)。
-
-延伸阅读：
-
-- [架构说明](docs/architecture.zh-CN.md)
-- [需求协变量与概率预测](docs/demand_covariates_and_probabilistic_forecasting.zh-CN.md)
-- [模型与算法选型指南](docs/models/model_and_algorithm_selection_guide.zh-CN.md)
-- [门店与仓点为什么必须分开](docs/articles/why-stores-and-fulfillment-nodes-must-be-separated.zh-CN.md)
-- [概率预测如何驱动补货](docs/articles/probabilistic-forecasting-for-replenishment.zh-CN.md)
-- [如何把需求模型替换为 LightGBM](docs/articles/replacing-the-demand-model-with-lightgbm.zh-CN.md)
-- [English README](README.md)
-- [参与贡献](CONTRIBUTING.zh-CN.md)
-- [安全说明](SECURITY.zh-CN.md)
 
 ## 联系方式
 
-欢迎通过邮箱 [aoezhb@gmail.com](mailto:aoezhb@gmail.com) 联系，交流问题、建议和扩展思路。
+问题、建议和扩展讨论：[aoezhb@gmail.com](mailto:aoezhb@gmail.com)
