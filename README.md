@@ -6,7 +6,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-2E8B57)
 ![Status: Reference implementation](https://img.shields.io/badge/Status-Reference%20implementation-E76F51)
 
-An extensible, testable, and auditable replenishment decision pipeline for instant-retail and front-warehouse operations.
+An extensible, testable, and auditable replenishment decision pipeline framework for instant-retail and front-warehouse operations.
 
 Open-source implementations already exist for demand forecasting, quantile prediction, safety stock, and inventory optimization. Intelligent-replenishment projects still often fall short because the difficult part is not finding another algorithm. It is building a systematic process that connects data definitions, model selection, inventory state, operating constraints, approvals, execution, and outcome evaluation.
 
