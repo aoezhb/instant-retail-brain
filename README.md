@@ -6,7 +6,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-2E8B57)
 ![Status: Reference implementation](https://img.shields.io/badge/Status-Reference%20implementation-E76F51)
 
-An extensible, testable, and auditable replenishment decision pipeline framework for instant-retail and front-warehouse operations.
+An extensible, testable, and auditable replenishment decision pipeline framework for instant-retail and front-warehouse operations, including the `闪电仓` format commonly discussed in China.
 
 Open-source implementations already exist for demand forecasting, quantile prediction, safety stock, and inventory optimization. Intelligent-replenishment projects still often fall short because the difficult part is not finding another algorithm. It is building a systematic process that connects data definitions, model selection, inventory state, operating constraints, approvals, execution, and outcome evaluation.
 
@@ -75,9 +75,9 @@ A forecast does not say whether an order is affordable, operationally valid, or 
 
 The core replenishment flow has no LLM dependency. P50/P90, order quantities, budget constraints, approvals, and execution checks are produced by deterministic models and rule engines.
 
-## Front-Warehouse Application
+## Front-Warehouse and 闪电仓 Application
 
-Front warehouses, also known as dark stores in some markets, are a common instant-retail fulfillment model and a primary application of this project:
+Front warehouses, also known as dark stores in some markets and often discussed through `闪电仓` formats in China, are a common instant-retail fulfillment model and a primary application of this project:
 
 - `business_unit_id`: operating entity;
 - `store_id`: online storefront, sales channel, or other demand source;
@@ -85,6 +85,8 @@ Front warehouses, also known as dark stores in some markets, are a common instan
 - `StoreNodeBinding`: service relationship between a demand source and a fulfillment node.
 
 The pipeline can aggregate storefront or channel demand, combine on-hand, inbound, reserved, and backordered inventory with lead and review times, and produce SKU replenishment quantities, expected spend, replay stockout outcomes, and approval requirements.
+
+The project uses platform-neutral data and interfaces and is not affiliated with any instant-retail platform or specific `闪电仓` brand.
 
 The current example uses a one-store-to-one-node relationship. One node serving multiple stores, multiple nodes serving one channel, shared inventory, split fulfillment, and dynamic sourcing require customer-specific network and allocation rules.
 
